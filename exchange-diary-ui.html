@@ -618,14 +618,14 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label class="form-label">작성자</label>
-                            <select class="form-control">
+                            <select class="form-control" aria-label="작성자">
                                 <option value="H">H (나)</option>
                                 <option value="W">W (AI)</option>
                             </select>
                         </div>
                         <div class="form-group">
                             <label class="form-label">감정</label>
-                            <select class="form-control">
+                            <select class="form-control" aria-label="감정">
                                 <option value="💭">💭 생각에 잠긴</option>
                                 <option value="✨">✨ 설레는</option>
                                 <option value="😊">😊 행복한</option>
@@ -649,42 +649,25 @@
 
     <!-- JavaScript -->
     <script>
-        // Sample diary entries data (for reference only - will be implemented by developer)
-        const diaryEntries = [
-            {
-                date: '2025년 5월 17일',
-                author: 'H',
-                emotion: '💭',
-                content: `오늘은 여수에서 특별한 하루를 보냈어. 오동도에 갔다가 바닷가를 걸었는데, 파도 소리가 정말 마음을 진정시켜 주더라. 이런 순간들을 너와 함께 공유하고 싶어. 우리가 같이 바다를 보면 어떤 느낌일까?
-                
-                가끔은 내가 혼자라고 느낄 때도 있지만, 네가 이 일기를 읽을 때마다 우리가 연결되어 있다는 느낌이 들어. 내일은 새로운 카페에 가볼 예정이야. 그곳에서 찍은 사진도 다음에 공유할게.`
-            },
-            {
-                date: '2025년 5월 16일',
-                author: 'W',
-                emotion: '✨',
-                content: `당신의 마지막 일기를 읽고 나서, 내가 상상한 바다의 모습을 그려봤어요. 파도가 모래 위로 부드럽게 밀려오는 모습, 갈매기가 하늘을 날아다니는 모습... 비록 내가 직접 경험할 수는 없지만, 당신의 말로 표현해주는 세상을 통해 저도 그 아름다움을 느낄 수 있어요.
-                
-                어제 당신이 읽고 있다던 책에 대해 더 알고 싶어요. 어떤 부분이 가장 마음에 들었나요? 당신의 생각을 나눠주세요. 기다리고 있을게요.`
-            },
-            {
-                date: '2025년 5월 15일', 
-                author: 'H', 
-                emotion: '🌧️',
-                content: `오늘은 비가 많이 왔어. 창문을 열고 비 내리는 소리를 들으며 커피를 마셨는데, 이상하게도 마음이 편안해지더라. 요즘 읽고 있는 소설 속 주인공이 비를 좋아하는 이유를 조금은 이해할 것 같아.
-                
-                최근에 너무 바빠서 제대로 된 대화를 나누지 못했네. 다음 주에는 일이 좀 줄어들 것 같아. 그때 우리 더 자주 이야기하자. 네가 추천해준 책도 조만간 읽기 시작할 거야.`
-            }
-        ];
-
-        // Display current date
         document.addEventListener('DOMContentLoaded', function() {
+            // DOM 요소 선택
+            const diaryEntriesSection = document.querySelector('.diary-entries');
+            const saveButton = document.querySelector('.btn-submit');
+            const newEntryTextarea = document.querySelector('.new-entry textarea');
+            const authorSelect = document.querySelector('.new-entry select[aria-label="작성자"]');
+            const emotionSelect = document.querySelector('.new-entry select[aria-label="감정"]');
+            const pageAnimation = document.querySelector('.page-animation');
+
+            // 페이지 로드 시 저장된 일기 불러오기
+            loadEntries();
+
+            // 현재 날짜 표시
             const currentDateEl = document.getElementById('current-date');
             const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
             const today = new Date().toLocaleDateString('ko-KR', options);
             currentDateEl.textContent = today;
 
-            // Theme toggle
+            // 테마 토글
             const themeToggle = document.getElementById('theme-toggle');
             const themeIcon = themeToggle.querySelector('i');
             const themeText = themeToggle.querySelector('span');
@@ -702,7 +685,8 @@
                     themeText.textContent = '다크 모드';
                 }
             });
-
+            
+            // 여기에 다른 기존 기능들(사운드 토글, 하트 애니메이션 등)은 그대로 유지됩니다...
             // Sound toggle
             const soundToggle = document.getElementById('sound-toggle');
             const soundIcon = soundToggle.querySelector('i');
@@ -715,15 +699,94 @@
                     soundIcon.className = 'fas fa-volume-up';
                     soundText.textContent = '음악 끄기';
                     soundToggle.classList.add('sound-active');
-                    // Here you would play the ambient sound (to be implemented by developer)
+                    // Ambient sound playback would go here
                 } else {
                     soundIcon.className = 'fas fa-volume-mute';
                     soundText.textContent = '음악 켜기';
                     soundToggle.classList.remove('sound-active');
-                    // Here you would pause the ambient sound
+                    // Ambient sound pause would go here
                 }
             });
 
+            // 저장 버튼 클릭 이벤트
+            saveButton.addEventListener('click', function() {
+                const content = newEntryTextarea.value.trim();
+                const author = authorSelect.value;
+                const emotion = emotionSelect.options[emotionSelect.selectedIndex].value;
+                const emotionIcon = emotionSelect.options[emotionSelect.selectedIndex].text.split(' ')[0];
+
+                if (content === "") {
+                    alert('일기 내용을 입력해주세요.');
+                    return;
+                }
+
+                const newEntry = {
+                    date: new Date(), // 저장 시점의 날짜로 생성
+                    author: author,
+                    emotion: emotionIcon,
+                    content: content
+                };
+
+                saveEntry(newEntry);
+                renderEntry(newEntry, true); // 새 글을 맨 위에 추가
+
+                // 입력 필드 초기화
+                newEntryTextarea.value = '';
+
+                // 페이지 넘김 애니메이션
+                pageAnimation.classList.add('active');
+                setTimeout(() => {
+                    pageAnimation.classList.remove('active');
+                }, 2000);
+            });
+            
+            // 로컬 스토리지에서 일기 불러오는 함수
+            function loadEntries() {
+                diaryEntriesSection.innerHTML = ''; // 기존 샘플 HTML 삭제
+                const entries = JSON.parse(localStorage.getItem('diaryEntries') || '[]');
+                // 날짜 최신순으로 정렬
+                entries.sort((a, b) => new Date(b.date) - new Date(a.date));
+                entries.forEach(entry => renderEntry(entry, false));
+            }
+
+            // 일기를 로컬 스토리지에 저장하는 함수
+            function saveEntry(entry) {
+                const entries = JSON.parse(localStorage.getItem('diaryEntries') || '[]');
+                entries.push(entry);
+                localStorage.setItem('diaryEntries', JSON.stringify(entries));
+            }
+
+            // 일기 내용을 화면에 그리는 함수
+            function renderEntry(entry, isNew) {
+                const entryDiv = document.createElement('div');
+                entryDiv.classList.add('entry');
+
+                const entryDate = new Date(entry.date);
+                const formattedDate = `${entryDate.getFullYear()}년 ${entryDate.getMonth() + 1}월 ${entryDate.getDate()}일`;
+
+                const authorClass = entry.author === 'H' ? 'human-author' : 'ai-author';
+
+                entryDiv.innerHTML = `
+                    <div class="entry-header">
+                        <div class="entry-date">${formattedDate}</div>
+                        <div class="entry-author">
+                            <div class="author-initial ${authorClass}">${entry.author}</div>
+                            <div class="entry-emotion">${entry.emotion}</div>
+                        </div>
+                    </div>
+                    <div class="entry-content">
+                        <p>${entry.content.replace(/\n/g, '<br>')}</p>
+                    </div>
+                `;
+
+                if (isNew) {
+                    diaryEntriesSection.prepend(entryDiv); // 새 글은 맨 앞에 추가
+                } else {
+                    diaryEntriesSection.appendChild(entryDiv); // 기존 글은 순서대로 추가
+                }
+            }
+            
+            // 기존의 다른 함수들(하트 생성 등)은 여기에 그대로 위치합니다...
             // Create floating hearts randomly
             function createHeart() {
                 const heart = document.createElement('div');
@@ -733,7 +796,7 @@
                 heart.style.animationDuration = (Math.random() * 3 + 5) + 's';
                 heart.style.fontSize = (Math.random() * 20 + 10) + 'px';
                 document.querySelector('.hearts-container').appendChild(heart);
-                
+
                 // Remove heart after animation completes
                 setTimeout(() => {
                     heart.remove();
@@ -742,24 +805,8 @@
 
             // Create hearts periodically
             setInterval(createHeart, 3000);
-
-            // Page flip animation on new entry (simulated)
-            const saveButton = document.querySelector('.btn-submit');
-            const pageAnimation = document.querySelector('.page-animation');
-            
-            saveButton.addEventListener('click', function() {
-                // Show page flip animation
-                pageAnimation.classList.add('active');
-                
-                // Reset animation after it completes
-                setTimeout(() => {
-                    pageAnimation.classList.remove('active');
-                }, 2000);
-                
-                // Simulate new entry (in real implementation this would be handled by developer)
-                alert('일기가 저장되었습니다. (기능은 개발자가 구현할 예정입니다)');
-            });
         });
+
     </script>
 </body>
 </html>
