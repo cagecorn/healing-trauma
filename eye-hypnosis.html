@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>눈 고정 최면 유도 도구</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #121638;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            color: #f0f0f0;
+            transition: background-color 2s ease;
+        }
+        
+        .container {
+            width: 90%;
+            max-width: 800px;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+        
+        h1 {
+            margin-bottom: 20px;
+            color: #f0f0f0;
+        }
+        
+        .controls {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+        }
+        
+        .hypnosis-area {
+            position: relative;
+            height: 300px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 30px 0;
+            overflow: hidden;
+            border-radius: 8px;
+        }
+        
+        .focus-object {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle, #6f9aff, #1a237e);
+            border-radius: 50%;
+            box-shadow: 0 0 15px #6f9aff, 0 0 30px #6f9aff;
+            opacity: 0.9;
+            transition: transform 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease;
+        }
+        
+        .guidance-text {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 20px;
+            color: #ffffff;
+            opacity: 0.8;
+            transition: opacity 1s ease;
+            line-height: 1.5;
+            padding: 0 20px;
+        }
+        
+        button {
+            background-color: #3f51b5;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #303f9f;
+        }
+        
+        button:disabled {
+            background-color: #9fa8da;
+            cursor: not-allowed;
+        }
+        
+        .settings {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .setting-group {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        label {
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #c5cae9;
+        }
+        
+        select, input {
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #3f51b5;
+            background-color: #252b5e;
+            color: #f0f0f0;
+            width: 100%;
+        }
+        
+        .timer {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 10px 0;
+            color: #f0f0f0;
+        }
+        
+        .progress-container {
+            width: 100%;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            margin: 10px 0;
+            height: 10px;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            border-radius: 5px;
+            background-color: #3f51b5;
+            width: 0%;
+            transition: width 1s linear;
+        }
+        
+        .instructions {
+            background-color: rgba(63, 81, 181, 0.2);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            text-align: left;
+            line-height: 1.6;
+        }
+        
+        .instructions h3 {
+            margin-top: 0;
+            color: #9fa8da;
+        }
+        
+        .phase-indicator {
+            margin-top: 15px;
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+        }
+        
+        .phase {
+            flex: 1;
+            text-align: center;
+            padding: 5px;
+            font-size: 12px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            margin: 0 2px;
+            transition: background-color 0.3s;
+        }
+        
+        .phase.active {
+            background-color: #3f51b5;
+            font-weight: bold;
+        }
+        
+        @media (max-width: 600px) {
+            .settings {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .setting-group {
+                width: 100%;
+            }
+            
+            .hypnosis-area {
+                height: 250px;
+            }
+            
+            .focus-object {
+                width: 60px;
+                height: 60px;
+            }
+        }
+        
+        .breath-guide {
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            opacity: 0;
+            transform: scale(1);
+            pointer-events: none;
+        }
+        
+        .pulse-animation {
+            animation: pulse 5s infinite ease-in-out;
+        }
+        
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 0.7;
+            }
+            50% {
+                transform: scale(1.5);
+                opacity: 0.3;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 0.7;
+            }
+        }
+        
+        .spiral-animation {
+            animation: spiral 10s infinite linear;
+        }
+        
+        @keyframes spiral {
+            0% {
+                transform: rotate(0deg) scale(1);
+            }
+            50% {
+                transform: rotate(180deg) scale(1.2);
+            }
+            100% {
+                transform: rotate(360deg) scale(1);
+            }
+        }
+        
+        .pendulum-animation {
+            animation: pendulum 4s infinite ease-in-out;
+        }
+        
+        @keyframes pendulum {
+            0% {
+                transform: translateX(-100px);
+            }
+            50% {
+                transform: translateX(100px);
+            }
+            100% {
+                transform: translateX(-100px);
+            }
+        }
+        
+        .fade-animation {
+            animation: fade 4s infinite ease-in-out;
+        }
+        
+        @keyframes fade {
+            0% {
+                opacity: 1;
+                box-shadow: 0 0 15px #6f9aff, 0 0 30px #6f9aff;
+            }
+            50% {
+                opacity: 0.3;
+                box-shadow: 0 0 5px #6f9aff, 0 0 10px #6f9aff;
+            }
+            100% {
+                opacity: 1;
+                box-shadow: 0 0 15px #6f9aff, 0 0 30px #6f9aff;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>눈 고정 최면 유도 도구</h1>
+        
+        <div class="controls">
+            <div class="settings">
+                <div class="setting-group">
+                    <label for="pattern">시각 패턴:</label>
+                    <select id="pattern">
+                        <option value="pulse">맥동</option>
+                        <option value="spiral">나선</option>
+                        <option value="pendulum">추 운동</option>
+                        <option value="fade">명암 변화</option>
+                    </select>
+                </div>
+                
+                <div class="setting-group">
+                    <label for="duration">세션 시간:</label>
+                    <select id="duration">
+                        <option value="300">5분</option>
+                        <option value="420">7분</option>
+                        <option value="600" selected>10분</option>
+                        <option value="900">15분</option>
+                    </select>
+                </div>
+                
+                <div class="setting-group">
+                    <label for="objectColor">객체 색상:</label>
+                    <select id="objectColor">
+                        <option value="blue" selected>파랑</option>
+                        <option value="purple">보라</option>
+                        <option value="teal">청록</option>
+                        <option value="gold">금색</option>
+                    </select>
+                </div>
+            </div>
+            
+            <button id="startBtn">시작</button>
+            <button id="stopBtn" disabled>중지</button>
+        </div>
+        
+        <div class="timer" id="timer">00:00</div>
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        
+        <div class="phase-indicator">
+            <div class="phase" id="phase1">준비</div>
+            <div class="phase" id="phase2">집중</div>
+            <div class="phase" id="phase3">이완</div>
+            <div class="phase" id="phase4">심화</div>
+            <div class="phase" id="phase5">마무리</div>
+        </div>
+        
+        <div class="hypnosis-area" id="hypnosisArea">
+            <div class="focus-object" id="focusObject"></div>
+            <div class="breath-guide" id="breathGuide"></div>
+            <div class="guidance-text" id="guidanceText">시작하려면 위의 시작 버튼을 누르세요.</div>
+        </div>
+        
+        <div class="instructions">
+            <h3>사용 방법</h3>
+            <p>1. 편안한 자세로 앉아 화면을 정면으로 바라봅니다.</p>
+            <p>2. 위의 설정에서 원하는 패턴과 시간을 선택하세요.</p>
+            <p>3. '시작' 버튼을 누르면 최면 유도 과정이 시작됩니다.</p>
+            <p>4. 객체를 자연스럽게 눈으로 따라가며, 화면의 안내에 따르세요.</p>
+            <p>5. 눈이 피로해지고 무거워지는 느낌이 들더라도 걱정하지 마세요. 이는 정상적인 반응입니다.</p>
+            <p><strong>참고:</strong> 이 도구는 간단한 이완을 위한 것이며, 전문적인 최면 치료를 대체하지 않습니다. 간질이나 기타 의학적 상태가 있는 경우 사용 전 의사와 상담하세요.</p>
+        </div>
+    </div>
+
+    <script>
+        const focusObject = document.getElementById('focusObject');
+        const breathGuide = document.getElementById('breathGuide');
+        const hypnosisArea = document.getElementById('hypnosisArea');
+        const guidanceText = document.getElementById('guidanceText');
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const patternSelect = document.getElementById('pattern');
+        const durationSelect = document.getElementById('duration');
+        const objectColorSelect = document.getElementById('objectColor');
+        const timerDisplay = document.getElementById('timer');
+        const progressBar = document.getElementById('progressBar');
+        const phases = [
+            document.getElementById('phase1'),
+            document.getElementById('phase2'),
+            document.getElementById('phase3'),
+            document.getElementById('phase4'),
+            document.getElementById('phase5')
+        ];
+        
+        let isSessionActive = false;
+        let timerInterval;
+        let remainingTime;
+        let totalTime;
+        let currentPhase = 0;
+        let guidanceInterval;
+        
+        // 색상 설정
+        const colorSchemes = {
+            blue: {
+                gradient: 'radial-gradient(circle, #6f9aff, #1a237e)',
+                shadow: '#6f9aff',
+                background: '#121638'
+            },
+            purple: {
+                gradient: 'radial-gradient(circle, #ce93d8, #4a148c)',
+                shadow: '#ce93d8',
+                background: '#1a0c33'
+            },
+            teal: {
+                gradient: 'radial-gradient(circle, #80cbc4, #004d40)',
+                shadow: '#80cbc4',
+                background: '#0f2e2b'
+            },
+            gold: {
+                gradient: 'radial-gradient(circle, #ffd54f, #ff6f00)',
+                shadow: '#ffd54f',
+                background: '#2c2000'
+            }
+        };
+
+        // 안내 메시지 세트
+        const guidanceMessages = {
+            preparation: [
+                "편안한 자세로 앉으세요.",
+                "깊고 천천히 숨을 들이마시고 내쉬세요.",
+                "어깨의 긴장을 풀어주세요.",
+                "이제 화면의 중앙에 있는 객체에 시선을 고정하세요.",
+                "자연스럽게 호흡하세요."
+            ],
+            focus: [
+                "객체를 계속 응시하세요.",
+                "눈을 깜빡이는 것은 자연스러운 현상입니다.",
+                "객체의 움직임이나 변화에 집중하세요.",
+                "주변의 다른 것들은 점점 흐려집니다.",
+                "오직 이 객체만 선명하게 보입니다."
+            ],
+            relaxation: [
+                "눈꺼풀이 점점 무거워지는 것을 느껴보세요.",
+                "눈의 피로감은 깊은 이완으로 이어집니다.",
+                "호흡할 때마다 몸이 더욱 이완됩니다.",
+                "마음이 점점 고요해지고 있습니다.",
+                "생각들이 구름처럼 흘러가게 두세요."
+            ],
+            deepening: [
+                "이제 더 깊은 이완 상태로 들어갑니다.",
+                "10에서 1까지 내려갈 때마다 더 깊이 이완됩니다.",
+                "외부의 소리는 당신을 더욱 깊은 상태로 인도합니다.",
+                "모든 근육이 완전히 이완되고 있습니다.",
+                "마음은 고요하고 평화롭습니다."
+            ],
+            completion: [
+                "곧 이 세션이 끝나갑니다.",
+                "천천히 평소의 각성 상태로 돌아옵니다.",
+                "새로운 에너지가 몸 전체에 퍼지고 있습니다.",
+                "깊게 숨을 들이마시고 천천히 내쉬세요.",
+                "이 이완된 느낌을 하루 종일 유지할 수 있습니다."
+            ]
+        };
+
+        // 애니메이션 설정
+        function setPattern(pattern) {
+            // 먼저 모든 애니메이션 클래스 제거
+            focusObject.classList.remove('pulse-animation', 'spiral-animation', 'pendulum-animation', 'fade-animation');
+            
+            // 선택된 패턴에 따라 애니메이션 적용
+            switch(pattern) {
+                case 'pulse':
+                    focusObject.classList.add('pulse-animation');
+                    break;
+                case 'spiral':
+                    focusObject.classList.add('spiral-animation');
+                    break;
+                case 'pendulum':
+                    focusObject.classList.add('pendulum-animation');
+                    break;
+                case 'fade':
+                    focusObject.classList.add('fade-animation');
+                    break;
+            }
+        }
+
+        // 색상 설정
+        function setColor(colorScheme) {
+            const scheme = colorSchemes[colorScheme];
+            focusObject.style.background = scheme.gradient;
+            focusObject.style.boxShadow = `0 0 15px ${scheme.shadow}, 0 0 30px ${scheme.shadow}`;
+            document.body.style.backgroundColor = scheme.background;
+        }
+
+        // 세션 시작
+        function startSession() {
+            if (isSessionActive) return;
+            
+            // 설정 값 가져오기
+            const pattern = patternSelect.value;
+            const duration = parseInt(durationSelect.value);
+            const colorScheme = objectColorSelect.value;
+            
+            // 타이머 설정
+            totalTime = duration;
+            remainingTime = duration;
+            updateTimerDisplay();
+            updateProgressBar();
+            
+            // 애니메이션 및 색상 설정
+            setPattern(pattern);
+            setColor(colorScheme);
+            
+            // 버튼 상태 변경
+            startBtn.disabled = true;
+            stopBtn.disabled = false;
+            
+            isSessionActive = true;
+            currentPhase = 0;
+            updatePhaseIndicator();
+            
+            // 호흡 가이드 초기화
+            breathGuide.style.opacity = '1';
+            breathGuide.classList.add('pulse-animation');
+            
+            // 첫 번째 안내 메시지 표시
+            showGuidanceMessage();
+            
+            // 안내 메시지 변경 간격 설정
+            guidanceInterval = setInterval(() => {
+                showGuidanceMessage();
+            }, 10000); // 10초마다 메시지 변경
+            
+            // 타이머 시작
+            timerInterval = setInterval(() => {
+                remainingTime--;
+                updateTimerDisplay();
+                updateProgressBar();
+                
+                // 단계 진행 결정
+                updatePhaseBasedOnProgress();
+                
+                if (remainingTime <= 0) {
+                    completeSession();
+                }
+            }, 1000);
+        }
+
+        // 진행 상황에 따른 단계 업데이트
+        function updatePhaseBasedOnProgress() {
+            const progress = (totalTime - remainingTime) / totalTime;
+            
+            if (progress < 0.15) {
+                setPhase(0); // 준비
+            } else if (progress < 0.35) {
+                setPhase(1); // 집중
+            } else if (progress < 0.55) {
+                setPhase(2); // 이완
+            } else if (progress < 0.85) {
+                setPhase(3); // 심화
+            } else {
+                setPhase(4); // 마무리
+            }
+        }
+
+        // 현재 단계 설정
+        function setPhase(phase) {
+            if (currentPhase !== phase) {
+                currentPhase = phase;
+                updatePhaseIndicator();
+                
+                // 배경 색 변화 (단계가 깊어질수록 더 어두워짐)
+                const colorScheme = objectColorSelect.value;
+                const baseColor = colorSchemes[colorScheme].background;
+                const darkenFactor = 1 - (phase * 0.1); // 단계가 높을수록 더 어두워짐
+                
+                // RGB 색상 어둡게 조정
+                const rgbMatch = baseColor.match(/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i);
+                if (rgbMatch) {
+                    const r = parseInt(rgbMatch[1], 16) * darkenFactor;
+                    const g = parseInt(rgbMatch[2], 16) * darkenFactor;
+                    const b = parseInt(rgbMatch[3], 16) * darkenFactor;
+                    document.body.style.backgroundColor = `rgb(${Math.floor(r)}, ${Math.floor(g)}, ${Math.floor(b)})`;
+                }
+            }
+        }
+
+        // 안내 메시지 표시
+        function showGuidanceMessage() {
+            const phaseMessages = getPhaseMessages();
+            const randomIndex = Math.floor(Math.random() * phaseMessages.length);
+            guidanceText.style.opacity = '0';
+            
+            setTimeout(() => {
+                guidanceText.textContent = phaseMessages[randomIndex];
+                guidanceText.style.opacity = '0.8';
+            }, 500);
+        }
+
+        // 현재 단계에 맞는 메시지 세트 반환
+        function getPhaseMessages() {
+            switch(currentPhase) {
+                case 0: return guidanceMessages.preparation;
+                case 1: return guidanceMessages.focus;
+                case 2: return guidanceMessages.relaxation;
+                case 3: return guidanceMessages.deepening;
+                case 4: return guidanceMessages.completion;
+                default: return guidanceMessages.preparation;
+            }
+        }
+
+        // 단계 표시기 업데이트
+        function updatePhaseIndicator() {
+            phases.forEach((phase, index) => {
+                if (index === currentPhase) {
+                    phase.classList.add('active');
+                } else {
+                    phase.classList.remove('active');
+                }
+            });
+        }
+
+        // 세션 중지
+        function stopSession() {
+            clearInterval(timerInterval);
+            clearInterval(guidanceInterval);
+            isSessionActive = false;
+            
+            // 버튼 상태 변경
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+            
+            // 안내 메시지 초기화
+            guidanceText.textContent = "세션이 중지되었습니다. 다시 시작하려면 시작 버튼을 누르세요.";
+            
+            // 호흡 가이드 숨기기
+            breathGuide.style.opacity = '0';
+            breathGuide.classList.remove('pulse-animation');
+            
+            // 배경색 복원
+            const colorScheme = objectColorSelect.value;
+            document.body.style.backgroundColor = colorSchemes[colorScheme].background;
+        }
+
+        // 세션 완료
+        function completeSession() {
+            clearInterval(timerInterval);
+            clearInterval(guidanceInterval);
+            isSessionActive = false;
+            
+            // 버튼 상태 변경
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+            
+            // 완료 메시지
+            guidanceText.textContent = "세션이 완료되었습니다. 천천히 눈을 깜빡이고 의식을 되찾으세요.";
+            
+            // 호흡 가이드 숨기기
+            breathGuide.style.opacity = '0';
+            breathGuide.classList.remove('pulse-animation');
+            
+            // 배경색 복원
+            const colorScheme = objectColorSelect.value;
+            document.body.style.backgroundColor = colorSchemes[colorScheme].background;
+        }
+
+        // 타이머 표시 업데이트
+        function updateTimerDisplay() {
+            const minutes = Math.floor(remainingTime / 60);
+            const seconds = remainingTime % 60;
+            timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        // 진행 바 업데이트
+        function updateProgressBar() {
+            const progressPercentage = ((totalTime - remainingTime) / totalTime) * 100;
+            progressBar.style.width = `${progressPercentage}%`;
+        }
+
+        // 이벤트 리스너
+        startBtn.addEventListener('click', startSession);
+        stopBtn.addEventListener('click', stopSession);
+        
+        // 색상 변경 이벤트
+        objectColorSelect.addEventListener('change', () => {
+            const colorScheme = objectColorSelect.value;
+            setColor(colorScheme);
+        });
+        
+        // 패턴 미리보기
+        patternSelect.addEventListener('change', () => {
+            const pattern = patternSelect.value;
+            setPattern(pattern);
+        });
+        
+        // 초기 패턴 및 색상 설정
+        setPattern(patternSelect.value);
+        setColor(objectColorSelect.value);
+        
+        // 창 크기 변경 시 조정
+        window.addEventListener('resize', () => {
+            // 필요한 경우 여기에 창 크기 조정 관련 코드 추가
+        });
+    </script>
+</body>
+</html>

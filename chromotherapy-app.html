@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>크로모테라피 웰니스 도구</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Noto Sans KR', sans-serif;
+        }
+
+        body {
+            transition: background-color 2s ease;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            text-align: center;
+            color: white;
+            text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+
+        h1 {
+            margin-bottom: 10px;
+        }
+
+        .container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            transition: all 1s ease;
+        }
+
+        .controls-container {
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            width: 100%;
+            max-width: 800px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .mode-selection {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .mode-btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            background-color: rgba(255, 255, 255, 0.3);
+            color: white;
+            text-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+        }
+
+        .mode-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .mode-btn.active {
+            background-color: rgba(255, 255, 255, 0.6);
+            color: #333;
+            text-shadow: none;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .settings {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .setting-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        label {
+            color: white;
+            font-weight: 500;
+            text-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.3);
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: white;
+            cursor: pointer;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+        }
+
+        select {
+            padding: 10px;
+            border-radius: 5px;
+            border: none;
+            background-color: rgba(255, 255, 255, 0.3);
+            color: white;
+            font-size: 16px;
+        }
+
+        option {
+            color: #333;
+        }
+
+        .start-btn {
+            padding: 15px 30px;
+            margin-top: 20px;
+            border: none;
+            border-radius: 30px;
+            background-color: rgba(255, 255, 255, 0.8);
+            color: #333;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .start-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .therapy-container {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            width: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 100;
+        }
+
+        .color-circle {
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            background-color: white;
+            box-shadow: 0 0 100px 50px rgba(255, 255, 255, 0.5);
+            animation: pulse 10s infinite alternate;
+            position: relative;
+        }
+
+        .breath-guide {
+            font-size: 24px;
+            color: white;
+            text-align: center;
+            margin-top: 30px;
+            text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .timer {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 24px;
+            color: white;
+            text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .exit-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 30px;
+            background-color: rgba(255, 255, 255, 0.3);
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .exit-btn:hover {
+            background-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .mood-assessment {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 800px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .mood-title {
+            color: white;
+            margin-bottom: 20px;
+            text-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+        }
+
+        .mood-options {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .mood-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 20px;
+            background-color: rgba(255, 255, 255, 0.3);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .mood-btn.selected {
+            background-color: rgba(255, 255, 255, 0.6);
+            color: #333;
+            transform: scale(1.05);
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(0.8);
+                opacity: 0.7;
+            }
+            50% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(0.8);
+                opacity: 0.7;
+            }
+        }
+
+        @keyframes breathe {
+            0% {
+                transform: scale(0.8);
+                opacity: 0.7;
+            }
+            40% {
+                transform: scale(1.2);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.2);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(0.8);
+                opacity: 0.7;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .settings {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>크로모테라피 웰니스 도구</h1>
+            <p>색상의 힘으로 마음과 몸의 균형을 찾아보세요</p>
+        </header>
+
+        <div class="mood-assessment">
+            <h2 class="mood-title">현재 기분은 어떠신가요?</h2>
+            <div class="mood-options">
+                <button class="mood-btn" data-mood="stressed">스트레스</button>
+                <button class="mood-btn" data-mood="anxious">불안</button>
+                <button class="mood-btn" data-mood="tired">피곤함</button>
+                <button class="mood-btn" data-mood="sad">슬픔</button>
+                <button class="mood-btn" data-mood="neutral">보통</button>
+                <button class="mood-btn" data-mood="happy">행복</button>
+                <button class="mood-btn" data-mood="excited">흥분</button>
+                <button class="mood-btn" data-mood="calm">평온</button>
+            </div>
+            <h2 class="mood-title">원하는 상태는 무엇인가요?</h2>
+            <div class="mood-options">
+                <button class="mood-btn" data-target="energized">활력 충전</button>
+                <button class="mood-btn" data-target="focused">집중력 향상</button>
+                <button class="mood-btn" data-target="balanced">균형 & 조화</button>
+                <button class="mood-btn" data-target="relaxed">휴식 & 진정</button>
+                <button class="mood-btn" data-target="creative">창의성 증진</button>
+                <button class="mood-btn" data-target="sleepy">수면 준비</button>
+            </div>
+        </div>
+
+        <div class="controls-container">
+            <div class="mode-selection">
+                <button class="mode-btn" data-mode="energize">에너지 활성화</button>
+                <button class="mode-btn" data-mode="balance">균형 & 조화</button>
+                <button class="mode-btn" data-mode="relax">휴식 & 진정</button>
+                <button class="mode-btn" data-mode="creative">창의성 증진</button>
+                <button class="mode-btn" data-mode="focus">집중력 강화</button>
+                <button class="mode-btn" data-mode="sleep">수면 준비</button>
+            </div>
+
+            <div class="settings">
+                <div class="setting-group">
+                    <label for="intensity">색상 강도</label>
+                    <input type="range" id="intensity" min="0.2" max="1" step="0.1" value="0.8">
+                </div>
+                <div class="setting-group">
+                    <label for="speed">색상 변화 속도</label>
+                    <input type="range" id="speed" min="1" max="10" step="1" value="5">
+                </div>
+                <div class="setting-group">
+                    <label for="duration">세션 시간 (분)</label>
+                    <select id="duration">
+                        <option value="3">3분</option>
+                        <option value="5" selected>5분</option>
+                        <option value="10">10분</option>
+                        <option value="15">15분</option>
+                        <option value="20">20분</option>
+                        <option value="30">30분</option>
+                    </select>
+                </div>
+                <div class="setting-group">
+                    <label for="breathing">호흡 가이드</label>
+                    <select id="breathing">
+                        <option value="none">없음</option>
+                        <option value="4-4-4-4" selected>4-4-4-4 박스 호흡</option>
+                        <option value="4-7-8">4-7-8 진정 호흡</option>
+                        <option value="5-5">5-5 균형 호흡</option>
+                    </select>
+                </div>
+            </div>
+
+            <button class="start-btn">테라피 시작하기</button>
+        </div>
+    </div>
+
+    <div class="therapy-container">
+        <button class="exit-btn">종료</button>
+        <div class="color-circle"></div>
+        <div class="breath-guide">들이쉬기...</div>
+        <div class="timer">05:00</div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 모드 정의
+            const modes = {
+                energize: {
+                    colors: ['#00BFFF', '#00FF7F', '#FFFF00'],
+                    description: '에너지 활성화 모드는 밝은 파란색과 녹색을 사용하여 활력을 불어넣습니다.',
+                    breathText: {
+                        inhale: '에너지를 들이마시고',
+                        hold: '잠시 유지하고',
+                        exhale: '피로를 내보내고',
+                        holdOut: '잠시 기다립니다'
+                    }
+                },
+                balance: {
+                    colors: ['#9370DB', '#3CB371', '#20B2AA'],
+                    description: '균형과 조화 모드는 보라색과 녹색계열을 사용하여 정신적 균형을 찾도록 도와줍니다.',
+                    breathText: {
+                        inhale: '조화를 들이마시고',
+                        hold: '균형을 느끼고',
+                        exhale: '불균형을 내보내고',
+                        holdOut: '평온함을 느낍니다'
+                    }
+                },
+                relax: {
+                    colors: ['#4169E1', '#6A5ACD', '#9370DB'],
+                    description: '휴식과 진정 모드는 차분한 파란색과 보라색을 사용하여 마음을 진정시킵니다.',
+                    breathText: {
+                        inhale: '평온함을 들이마시고',
+                        hold: '잠시 유지하고',
+                        exhale: '긴장을 내보내고',
+                        holdOut: '이완을 느낍니다'
+                    }
+                },
+                creative: {
+                    colors: ['#FFD700', '#FFA500', '#FF6347'],
+                    description: '창의성 증진 모드는 노란색과 주황색을 사용하여 창의적 사고를 자극합니다.',
+                    breathText: {
+                        inhale: '영감을 들이마시고',
+                        hold: '아이디어를 떠올리고',
+                        exhale: '제한을 내보내고',
+                        holdOut: '가능성을 봅니다'
+                    }
+                },
+                focus: {
+                    colors: ['#1E90FF', '#4682B4', '#87CEEB'],
+                    description: '집중력 강화 모드는 파란색 계열을 사용하여 명료한 사고와 집중력을 높입니다.',
+                    breathText: {
+                        inhale: '선명함을 들이마시고',
+                        hold: '집중을 유지하고',
+                        exhale: '산만함을 내보내고',
+                        holdOut: '명료함을 느낍니다'
+                    }
+                },
+                sleep: {
+                    colors: ['#483D8B', '#4B0082', '#2E0854'],
+                    description: '수면 준비 모드는 어두운 보라색과 남색을 사용하여 편안한 수면을 준비합니다.',
+                    breathText: {
+                        inhale: '편안함을 들이마시고',
+                        hold: '이완을 느끼고',
+                        exhale: '깨어있음을 내보내고',
+                        holdOut: '고요함을 느낍니다'
+                    }
+                }
+            };
+
+            // 기분에 따른 모드 추천
+            const moodRecommendations = {
+                stressed: 'relax',
+                anxious: 'relax',
+                tired: 'energize',
+                sad: 'creative',
+                neutral: 'balance',
+                happy: 'creative',
+                excited: 'balance',
+                calm: 'focus'
+            };
+
+            // 목표 상태에 따른 모드 추천
+            const targetRecommendations = {
+                energized: 'energize',
+                focused: 'focus',
+                balanced: 'balance',
+                relaxed: 'relax',
+                creative: 'creative',
+                sleepy: 'sleep'
+            };
+
+            // 초기화
+            let currentMode = 'balance';
+            let selectedMood = null;
+            let selectedTarget = null;
+            let therapyInterval = null;
+            let breathingInterval = null;
+            let timerInterval = null;
+            let secondsLeft = 300; // 기본 5분
+            let currentBreathPhase = 0;
+            let breathingPattern = [4, 4, 4, 4]; // 기본 박스 호흡
+
+            // DOM 요소 선택
+            const body = document.body;
+            const modeButtons = document.querySelectorAll('.mode-btn');
+            const moodButtons = document.querySelectorAll('.mood-btn[data-mood]');
+            const targetButtons = document.querySelectorAll('.mood-btn[data-target]');
+            const startButton = document.querySelector('.start-btn');
+            const exitButton = document.querySelector('.exit-btn');
+            const therapyContainer = document.querySelector('.therapy-container');
+            const colorCircle = document.querySelector('.color-circle');
+            const breathGuide = document.querySelector('.breath-guide');
+            const timerDisplay = document.querySelector('.timer');
+            const intensitySlider = document.getElementById('intensity');
+            const speedSlider = document.getElementById('speed');
+            const durationSelect = document.getElementById('duration');
+            const breathingSelect = document.getElementById('breathing');
+
+            // 모드 버튼 이벤트 리스너
+            modeButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const mode = this.getAttribute('data-mode');
+                    selectMode(mode);
+                    
+                    // 다른 모드 버튼에서 active 클래스 제거
+                    modeButtons.forEach(btn => btn.classList.remove('active'));
+                    // 현재 버튼에 active 클래스 추가
+                    this.classList.add('active');
+                });
+            });
+
+            // 기분 버튼 이벤트 리스너
+            moodButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const mood = this.getAttribute('data-mood');
+                    selectedMood = mood;
+                    
+                    // 다른 기분 버튼에서 selected 클래스 제거
+                    moodButtons.forEach(btn => btn.classList.remove('selected'));
+                    // 현재 버튼에 selected 클래스 추가
+                    this.classList.add('selected');
+                    
+                    // 기분에 따른 모드 추천
+                    const recommendedMode = moodRecommendations[mood];
+                    if (recommendedMode) {
+                        selectMode(recommendedMode);
+                        
+                        // 추천 모드 버튼에 active 클래스 추가
+                        modeButtons.forEach(btn => {
+                            if (btn.getAttribute('data-mode') === recommendedMode) {
+                                btn.classList.add('active');
+                            } else {
+                                btn.classList.remove('active');
+                            }
+                        });
+                    }
+                });
+            });
+
+            // 목표 상태 버튼 이벤트 리스너
+            targetButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const target = this.getAttribute('data-target');
+                    selectedTarget = target;
+                    
+                    // 다른 목표 버튼에서 selected 클래스 제거
+                    targetButtons.forEach(btn => btn.classList.remove('selected'));
+                    // 현재 버튼에 selected 클래스 추가
+                    this.classList.add('selected');
+                    
+                    // 목표 상태에 따른 모드 추천
+                    const recommendedMode = targetRecommendations[target];
+                    if (recommendedMode) {
+                        selectMode(recommendedMode);
+                        
+                        // 추천 모드 버튼에 active 클래스 추가
+                        modeButtons.forEach(btn => {
+                            if (btn.getAttribute('data-mode') === recommendedMode) {
+                                btn.classList.add('active');
+                            } else {
+                                btn.classList.remove('active');
+                            }
+                        });
+                    }
+                });
+            });
+
+            // 모드 선택 함수
+            function selectMode(mode) {
+                currentMode = mode;
+                const modeColors = modes[mode].colors;
+                const intensity = intensitySlider.value;
+                
+                // 배경색 변경 (첫 번째 색상으로)
+                const adjustedColor = adjustColorIntensity(modeColors[0], intensity);
+                body.style.backgroundColor = adjustedColor;
+                
+                console.log(`모드 변경: ${mode} - ${modes[mode].description}`);
+            }
+
+            // 색상 강도 조절 함수
+            function adjustColorIntensity(hexColor, intensity) {
+                // HEX를 RGB로 변환
+                const r = parseInt(hexColor.slice(1, 3), 16);
+                const g = parseInt(hexColor.slice(3, 5), 16);
+                const b = parseInt(hexColor.slice(5, 7), 16);
+                
+                // 강도에 따라 RGB 값 조절 (어두워지는 방향)
+                const adjustedR = Math.round(r * intensity);
+                const adjustedG = Math.round(g * intensity);
+                const adjustedB = Math.round(b * intensity);
+                
+                // RGB 값을 HEX로 다시 변환
+                return `rgb(${adjustedR}, ${adjustedG}, ${adjustedB})`;
+            }
+
+            // 테라피 시작 버튼 이벤트 리스너
+            startButton.addEventListener('click', function() {
+                // 세션 시간 설정
+                secondsLeft = parseInt(durationSelect.value) * 60;
+                updateTimerDisplay();
+                
+                // 호흡 패턴 설정
+                const breathPattern = breathingSelect.value;
+                if (breathPattern === '4-4-4-4') {
+                    breathingPattern = [4, 4, 4, 4]; // 박스 호흡
+                } else if (breathPattern === '4-7-8') {
+                    breathingPattern = [4, 7, 8, 0]; // 4-7-8 호흡
+                } else if (breathPattern === '5-5') {
+                    breathingPattern = [5, 0, 5, 0]; // 5-5 균형 호흡
+                }
+                
+                // 테라피 컨테이너 표시
+                therapyContainer.style.display = 'flex';
+                
+                // 색상 순환 시작
+                startColorCycle();
+                
+                // 호흡 가이드 시작 (선택한 경우)
+                if (breathPattern !== 'none') {
+                    startBreathingGuide();
+                } else {
+                    breathGuide.style.display = 'none';
+                }
+                
+                // 타이머 시작
+                startTimer();
+            });
+
+            // 종료 버튼 이벤트 리스너
+            exitButton.addEventListener('click', function() {
+                endTherapy();
+            });
+
+            // 색상 순환 시작 함수
+            function startColorCycle() {
+                const modeColors = modes[currentMode].colors;
+                const speed = 11 - parseInt(speedSlider.value); // 슬라이더 값이 커질수록 속도가 빨라짐
+                const intensity = intensitySlider.value;
+                let colorIndex = 0;
+                
+                // 이전 인터벌 정리
+                if (therapyInterval) clearInterval(therapyInterval);
+                
+                // 첫 번째 색상으로 시작
+                let adjustedColor = adjustColorIntensity(modeColors[colorIndex], intensity);
+                body.style.backgroundColor = adjustedColor;
+                colorCircle.style.backgroundColor = adjustedColor;
+                colorCircle.style.boxShadow = `0 0 100px 50px ${adjustedColor}`;
+                
+                // 색상 순환 인터벌 설정
+                therapyInterval = setInterval(() => {
+                    colorIndex = (colorIndex + 1) % modeColors.length;
+                    adjustedColor = adjustColorIntensity(modeColors[colorIndex], intensity);
+                    
+                    body.style.backgroundColor = adjustedColor;
+                    colorCircle.style.backgroundColor = adjustedColor;
+                    colorCircle.style.boxShadow = `0 0 100px 50px ${adjustedColor}`;
+                }, speed * 1000);
+            }
+
+            // 호흡 가이드 시작 함수
+            function startBreathingGuide() {
+                const breathTexts = modes[currentMode].breathText;
+                let phaseIndex = 0;
+                let secondsInPhase = 0;
+                
+                // 이전 인터벌 정리
+                if (breathingInterval) clearInterval(breathingInterval);
+                
+                // 첫 단계 텍스트 설정
+                updateBreathText(phaseIndex);
+                
+                // 호흡 애니메이션 설정
+                colorCircle.style.animation = 'none';
+                setTimeout(() => {
+                    colorCircle.style.animation = `breathe ${breathingPattern.reduce((a, b) => a + b, 0)}s infinite linear`;
+                }, 10);
+                
+                // 호흡 가이드 인터벌 설정
+                breathingInterval = setInterval(() => {
+                    secondsInPhase++;
+                    
+                    // 현재 단계의 시간이 다 되면 다음 단계로
+                    if (secondsInPhase >= breathingPattern[phaseIndex]) {
+                        phaseIndex = (phaseIndex + 1) % 4;
+                        secondsInPhase = 0;
+                        updateBreathText(phaseIndex);
+                    }
+                }, 1000);
+            }
+
+            // 호흡 텍스트 업데이트 함수
+            function updateBreathText(phaseIndex) {
+                const breathTexts = modes[currentMode].breathText;
+                
+                switch(phaseIndex) {
+                    case 0:
+                        breathGuide.textContent = breathTexts.inhale;
+                        break;
+                    case 1:
+                        breathGuide.textContent = breathTexts.hold;
+                        break;
+                    case 2:
+                        breathGuide.textContent = breathTexts.exhale;
+                        break;
+                    case 3:
+                        breathGuide.textContent = breathTexts.holdOut;
+                        break;
+                }
+            }
+
+            // 타이머 시작 함수
+            function startTimer() {
+                // 이전 인터벌 정리
+                if (timerInterval) clearInterval(timerInterval);
+                
+                // 타이머 인터벌 설정
+                timerInterval = setInterval(() => {
+                    secondsLeft--;
+                    updateTimerDisplay();
+                    
+                    // 시간이 다 되면 종료
+                    if (secondsLeft <= 0) {
+                        endTherapy();
+                    }
+                }, 1000);
+            }
+
+            // 타이머 디스플레이 업데이트 함수
+            function updateTimerDisplay() {
+                const minutes = Math.floor(secondsLeft / 60);
+                const seconds = secondsLeft % 60;
+                
+                timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }
+
+            // 테라피 종료 함수
+            function endTherapy() {
+                // 모든 인터벌 정리
+                if (therapyInterval) clearInterval(therapyInterval);
+                if (breathingInterval) clearInterval(breathingInterval);
+                if (timerInterval) clearInterval(timerInterval);
+                
+                // 테라피 컨테이너 숨기기
+                therapyContainer.style.display = 'none';
+                
+                // 애니메이션 리셋
+                colorCircle.style.animation = 'pulse 10s infinite alternate';
+                
+                // 배경 색상 초기화 (선택한 모드의 첫 번째 색상으로)
+                const modeColors = modes[currentMode].colors;
+                const intensity = intensitySlider.value;
+                body.style.backgroundColor = adjustColorIntensity(modeColors[0], intensity);
+                
+                alert('크로모테라피 세션이 완료되었습니다. 어떤 느낌이 드셨나요?');
+            }
+
+            // 초기 모드 설정 (균형 & 조화)
+            selectMode('balance');
+            modeButtons[1].classList.add('active'); // 균형 & 조화 버튼을 활성화
+        });
+    </script>
+</body>
+</html>

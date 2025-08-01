@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EMDR 안구 움직임 추적 도구</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            text-align: center;
+        }
+        
+        .container {
+            width: 90%;
+            max-width: 800px;
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        
+        .controls {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+        }
+        
+        .track-area {
+            position: relative;
+            height: 100px;
+            width: 100%;
+            background-color: #e9e9e9;
+            border-radius: 8px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .target {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background-color: #3498db;
+            border-radius: 50%;
+            top: 50%;
+            transform: translateY(-50%);
+            transition: left 0.05s linear;
+        }
+        
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+        }
+        
+        button:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+        
+        .settings {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .setting-group {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        label {
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        
+        select, input {
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            width: 100%;
+        }
+        
+        .timer {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 10px 0;
+            color: #333;
+        }
+        
+        .instructions {
+            background-color: #e8f4f8;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            text-align: left;
+            line-height: 1.6;
+        }
+        
+        .instructions h3 {
+            margin-top: 0;
+            color: #2980b9;
+        }
+        
+        @media (max-width: 600px) {
+            .settings {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .setting-group {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>EMDR 안구 움직임 추적 도구</h1>
+        
+        <div class="controls">
+            <div class="settings">
+                <div class="setting-group">
+                    <label for="speed">속도 (초당 움직임 횟수):</label>
+                    <select id="speed">
+                        <option value="0.5">매우 느림 (0.5회/초)</option>
+                        <option value="1" selected>느림 (1회/초)</option>
+                        <option value="1.5">중간 (1.5회/초)</option>
+                        <option value="2">빠름 (2회/초)</option>
+                        <option value="2.5">매우 빠름 (2.5회/초)</option>
+                    </select>
+                </div>
+                
+                <div class="setting-group">
+                    <label for="duration">세션 시간:</label>
+                    <select id="duration">
+                        <option value="30">30초</option>
+                        <option value="45">45초</option>
+                        <option value="60" selected>60초</option>
+                        <option value="90">90초</option>
+                        <option value="120">120초</option>
+                    </select>
+                </div>
+                
+                <div class="setting-group">
+                    <label for="targetColor">타겟 색상:</label>
+                    <select id="targetColor">
+                        <option value="#3498db" selected>파랑</option>
+                        <option value="#e74c3c">빨강</option>
+                        <option value="#2ecc71">초록</option>
+                        <option value="#f39c12">주황</option>
+                        <option value="#9b59b6">보라</option>
+                    </select>
+                </div>
+            </div>
+            
+            <button id="startBtn">시작</button>
+            <button id="stopBtn" disabled>중지</button>
+        </div>
+        
+        <div class="timer" id="timer">00:00</div>
+        
+        <div class="track-area" id="trackArea">
+            <div class="target" id="target"></div>
+        </div>
+        
+        <div class="instructions">
+            <h3>사용 방법</h3>
+            <p>1. 위의 설정에서 원하는 속도와 세션 시간을 선택하세요.</p>
+            <p>2. '시작' 버튼을 누르면 타겟이 좌우로 움직이기 시작합니다.</p>
+            <p>3. 타겟을 눈으로만 따라가며, 머리는 움직이지 마세요.</p>
+            <p>4. 세션 도중 멈추려면 '중지' 버튼을 누르세요.</p>
+            <p>5. 한 세션이 끝나면 잠시 휴식한 후 필요에 따라 반복하세요.</p>
+            <p><strong>참고:</strong> 이 도구는 전문 EMDR 치료를 대체하지 않습니다. 트라우마나 심각한 정신 건강 문제가 있는 경우 전문가와 상담하세요.</p>
+        </div>
+    </div>
+
+    <script>
+        const target = document.getElementById('target');
+        const trackArea = document.getElementById('trackArea');
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const speedSelect = document.getElementById('speed');
+        const durationSelect = document.getElementById('duration');
+        const targetColorSelect = document.getElementById('targetColor');
+        const timerDisplay = document.getElementById('timer');
+        
+        let isMoving = false;
+        let movingRight = true;
+        let moveInterval;
+        let timerInterval;
+        let remainingTime;
+        
+        // 초기화
+        target.style.left = '10px';
+        
+        function startMovement() {
+            if (isMoving) return;
+            
+            // 설정 값 가져오기
+            const speed = parseFloat(speedSelect.value);
+            const duration = parseInt(durationSelect.value);
+            const color = targetColorSelect.value;
+            
+            // 타겟 색상 설정
+            target.style.backgroundColor = color;
+            
+            // 타이머 설정
+            remainingTime = duration;
+            updateTimerDisplay();
+            
+            // 버튼 상태 변경
+            startBtn.disabled = true;
+            stopBtn.disabled = false;
+            
+            // 움직임 주기 계산 (ms)
+            const movePeriod = 1000 / speed / 2; // 왕복이므로 2로 나눔
+            
+            isMoving = true;
+            
+            // 타이머 시작
+            timerInterval = setInterval(() => {
+                remainingTime--;
+                updateTimerDisplay();
+                
+                if (remainingTime <= 0) {
+                    stopMovement();
+                }
+            }, 1000);
+            
+            // 움직임 시작
+            moveInterval = setInterval(() => {
+                const trackWidth = trackArea.clientWidth;
+                const targetWidth = target.clientWidth;
+                
+                let currentPos = parseInt(target.style.left) || 0;
+                
+                if (movingRight) {
+                    currentPos += 10;
+                    if (currentPos >= trackWidth - targetWidth - 10) {
+                        movingRight = false;
+                    }
+                } else {
+                    currentPos -= 10;
+                    if (currentPos <= 10) {
+                        movingRight = true;
+                    }
+                }
+                
+                target.style.left = currentPos + 'px';
+            }, 20); // 부드러운 움직임을 위해 짧은 간격으로 설정
+        }
+        
+        function stopMovement() {
+            clearInterval(moveInterval);
+            clearInterval(timerInterval);
+            isMoving = false;
+            
+            // 버튼 상태 변경
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+        }
+        
+        function updateTimerDisplay() {
+            const minutes = Math.floor(remainingTime / 60);
+            const seconds = remainingTime % 60;
+            timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+        
+        // 이벤트 리스너
+        startBtn.addEventListener('click', startMovement);
+        stopBtn.addEventListener('click', stopMovement);
+        
+        // 화면 크기 변경 시 타겟 위치 조정
+        window.addEventListener('resize', () => {
+            if (!isMoving) {
+                target.style.left = '10px';
+            }
+        });
+    </script>
+</body>
+</html>
