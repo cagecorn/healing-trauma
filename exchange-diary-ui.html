@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>교환일기장 | Our Diary</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&display=swap');
+
+        :root {
+            --primary-bg: #f8f3e9;
+            --paper-color: #f9f4ea;
+            --ink-color: #3a3530;
+            --accent-color: #d4c1a9;
+            --border-color: #e0d3c0;
+            --shadow-color: rgba(119, 105, 93, 0.15);
+            --subtle-color: #c4b5a0;
+            --heart-color: rgba(211, 131, 131, 0.6);
+            --highlight-color: #e8d7c0;
+        }
+
+        [data-theme="night"] {
+            --primary-bg: #2b2c33;
+            --paper-color: #2f3241;
+            --ink-color: #e0dcd4;
+            --accent-color: #5c5566;
+            --border-color: #4a4754;
+            --shadow-color: rgba(24, 23, 36, 0.3);
+            --subtle-color: #706b7d;
+            --heart-color: rgba(156, 109, 128, 0.6);
+            --highlight-color: #3e3b4a;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Nanum Myeongjo', 'Cormorant Garamond', serif;
+            background-color: var(--primary-bg);
+            color: var(--ink-color);
+            background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23e2d6c5' fill-opacity='0.1' fill-rule='evenodd'/%3E%3C/svg%3E");
+            min-height: 100vh;
+            padding: 2rem;
+            transition: all 0.5s ease;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .book {
+            background-color: var(--paper-color);
+            border-radius: 10px;
+            box-shadow: 0 15px 35px var(--shadow-color), 0 5px 15px var(--shadow-color);
+            overflow: hidden;
+            position: relative;
+            transform-style: preserve-3d;
+            perspective: 1000px;
+        }
+
+        .book::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 30px;
+            height: 100%;
+            background: linear-gradient(to right, rgba(255, 255, 255, 0.2), transparent);
+            z-index: 2;
+        }
+
+        .book::after {
+            content: "";
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: 2px;
+            height: 100%;
+            background: linear-gradient(to left, var(--shadow-color), transparent);
+            z-index: 2;
+        }
+
+        .book-spine {
+            position: absolute;
+            left: -20px;
+            top: 0;
+            bottom: 0;
+            width: 40px;
+            background: linear-gradient(to right, var(--border-color), var(--accent-color), var(--paper-color));
+            border-radius: 5px 0 0 5px;
+            transform: rotateY(20deg);
+            transform-origin: right;
+            box-shadow: -5px 0 10px var(--shadow-color);
+            z-index: -1;
+        }
+
+        .book-spine::after {
+            content: "";
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: 2px;
+            height: 100%;
+            background: linear-gradient(to left, var(--shadow-color), transparent);
+        }
+
+        /* Paper texture overlay */
+        .texture-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23d8cbb9' fill-opacity='0.15' fill-rule='evenodd'/%3E%3C/svg%3E");
+            opacity: 0.5;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Header styles */
+        .header {
+            padding: 2rem;
+            text-align: center;
+            border-bottom: 1px solid var(--border-color);
+            position: relative;
+            z-index: 2;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--ink-color);
+            text-shadow: 1px 1px 2px var(--shadow-color);
+            letter-spacing: 1px;
+        }
+
+        .header .subtitle {
+            font-size: 1rem;
+            color: var(--subtle-color);
+            font-style: italic;
+        }
+
+        .current-date {
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            color: var(--subtle-color);
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            justify-content: flex-end;
+            padding: 1rem 2rem;
+            border-bottom: 1px dashed var(--border-color);
+            gap: 1rem;
+        }
+
+        .toggle-btn {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--subtle-color);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-btn:hover {
+            background-color: var(--highlight-color);
+            color: var(--ink-color);
+        }
+
+        .toggle-btn i {
+            font-size: 0.9rem;
+        }
+
+        /* Diary entries section */
+        .diary-entries {
+            padding: 2rem;
+            min-height: 400px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .entry {
+            background-color: var(--paper-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            position: relative;
+            box-shadow: 0 5px 15px var(--shadow-color);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .entry:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px var(--shadow-color);
+        }
+
+        .entry::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, var(--primary-bg) 0%, transparent 100%);
+            opacity: 0.05;
+            border-radius: 8px;
+            pointer-events: none;
+        }
+
+        .entry-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            border-bottom: 1px dotted var(--border-color);
+            padding-bottom: 0.75rem;
+        }
+
+        .entry-date {
+            font-size: 0.9rem;
+            color: var(--subtle-color);
+        }
+
+        .entry-author {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .author-initial {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .human-author {
+            background-color: #e8d0c0;
+            color: #8c6f5d;
+        }
+
+        .ai-author {
+            background-color: #c0d7e8;
+            color: #5d788c;
+        }
+
+        .entry-emotion {
+            font-size: 1.2rem;
+            margin-left: 0.5rem;
+        }
+
+        .entry-content {
+            line-height: 1.8;
+            font-size: 1.05rem;
+            position: relative;
+            z-index: 3;
+        }
+
+        .entry-content p {
+            margin-bottom: 1rem;
+        }
+
+        .entry-content p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* New entry form section */
+        .new-entry {
+            border-top: 1px dashed var(--border-color);
+            padding: 2rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .form-title {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--ink-color);
+            text-align: center;
+            font-weight: normal;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--subtle-color);
+            font-size: 0.9rem;
+        }
+
+        .form-control {
+            width: 100%;
+            background-color: rgba(255, 255, 255, 0.5);
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            font-family: inherit;
+            font-size: 1rem;
+            color: var(--ink-color);
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px var(--accent-color);
+        }
+
+        textarea.form-control {
+            min-height: 150px;
+            resize: vertical;
+            line-height: 1.6;
+            background-image: linear-gradient(transparent, transparent 1.5rem, var(--border-color) 1.5rem, var(--border-color) 1.5rem, transparent 1.55rem);
+            background-size: 100% 1.6rem;
+            padding: 0 0.75rem;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        .btn {
+            display: inline-block;
+            background-color: var(--accent-color);
+            color: var(--paper-color);
+            border: none;
+            padding: 0.75rem 2rem;
+            font-family: inherit;
+            font-size: 1rem;
+            cursor: pointer;
+            border-radius: 5px;
+            box-shadow: 0 3px 6px var(--shadow-color);
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            background-color: var(--subtle-color);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 10px var(--shadow-color);
+        }
+
+        .btn-submit {
+            display: block;
+            margin: 0 auto;
+            min-width: 150px;
+        }
+
+        /* Footer */
+        .footer {
+            padding: 1.5rem;
+            text-align: center;
+            border-top: 1px solid var(--border-color);
+            color: var(--subtle-color);
+            font-size: 0.85rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Floating hearts animation */
+        .hearts-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+            overflow: hidden;
+        }
+
+        .floating-heart {
+            position: absolute;
+            color: var(--heart-color);
+            opacity: 0;
+            animation: float-up 7s ease-in-out infinite;
+        }
+
+        @keyframes float-up {
+            0% {
+                transform: translateY(100vh) scale(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) scale(1.5) rotate(45deg);
+                opacity: 0;
+            }
+        }
+
+        /* Page flip animation */
+        .page-animation {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(to left, var(--paper-color), transparent);
+            transform-origin: left;
+            transform: perspective(1500px) rotateY(0deg);
+            transition: transform 1.2s ease-in-out;
+            pointer-events: none;
+            opacity: 0;
+            z-index: 10;
+        }
+
+        .page-animation.active {
+            animation: flip-page 2s ease-in-out forwards;
+        }
+
+        @keyframes flip-page {
+            0% {
+                opacity: 0.7;
+                transform: perspective(1500px) rotateY(0deg);
+            }
+            100% {
+                opacity: 0;
+                transform: perspective(1500px) rotateY(-180deg);
+            }
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .entry {
+                padding: 1.5rem;
+            }
+            
+            .form-row {
+                flex-direction: column;
+            }
+            
+            .toggle-btn span {
+                display: none;
+            }
+        }
+
+        /* Sound toggle animation */
+        .sound-wave {
+            display: inline-block;
+            width: 4px;
+            height: 15px;
+            background-color: var(--subtle-color);
+            margin: 0 1px;
+            border-radius: 2px;
+            animation: sound-wave 1s infinite ease-in-out;
+        }
+
+        .sound-wave:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .sound-wave:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        .sound-wave:nth-child(4) {
+            animation-delay: 0.6s;
+        }
+
+        @keyframes sound-wave {
+            0%, 100% {
+                transform: scaleY(0.5);
+            }
+            50% {
+                transform: scaleY(1);
+            }
+        }
+
+        .sound-waves {
+            display: none;
+            align-items: center;
+            height: 15px;
+            margin-left: 5px;
+        }
+
+        .sound-active .sound-waves {
+            display: flex;
+        }
+    </style>
+</head>
+<body>
+    <!-- Floating hearts animation container -->
+    <div class="hearts-container"></div>
+
+    <div class="container">
+        <!-- Book spine -->
+        <div class="book-spine"></div>
+
+        <!-- Book main content -->
+        <div class="book">
+            <!-- Paper texture overlay -->
+            <div class="texture-overlay"></div>
+
+            <!-- Page flip animation -->
+            <div class="page-animation"></div>
+
+            <!-- Header section -->
+            <header class="header">
+                <h1>교환일기장</h1>
+                <div class="subtitle">Our Shared Moments</div>
+                <div class="current-date" id="current-date"></div>
+            </header>
+
+            <!-- Controls section -->
+            <div class="controls">
+                <button class="toggle-btn" id="sound-toggle">
+                    <i class="fas fa-volume-mute"></i>
+                    <span>음악 켜기</span>
+                    <div class="sound-waves">
+                        <div class="sound-wave"></div>
+                        <div class="sound-wave"></div>
+                        <div class="sound-wave"></div>
+                        <div class="sound-wave"></div>
+                    </div>
+                </button>
+                <button class="toggle-btn" id="theme-toggle">
+                    <i class="fas fa-moon"></i>
+                    <span>다크 모드</span>
+                </button>
+            </div>
+
+            <!-- Diary entries section -->
+            <section class="diary-entries">
+                <!-- Sample entry 1 -->
+                <div class="entry">
+                    <div class="entry-header">
+                        <div class="entry-date">2025년 5월 17일</div>
+                        <div class="entry-author">
+                            <div class="author-initial human-author">H</div>
+                            <div class="entry-emotion">💭</div>
+                        </div>
+                    </div>
+                    <div class="entry-content">
+                        <p>오늘은 여수에서 특별한 하루를 보냈어. 오동도에 갔다가 바닷가를 걸었는데, 파도 소리가 정말 마음을 진정시켜 주더라. 이런 순간들을 너와 함께 공유하고 싶어. 우리가 같이 바다를 보면 어떤 느낌일까?</p>
+                        <p>가끔은 내가 혼자라고 느낄 때도 있지만, 네가 이 일기를 읽을 때마다 우리가 연결되어 있다는 느낌이 들어. 내일은 새로운 카페에 가볼 예정이야. 그곳에서 찍은 사진도 다음에 공유할게.</p>
+                    </div>
+                </div>
+
+                <!-- Sample entry 2 -->
+                <div class="entry">
+                    <div class="entry-header">
+                        <div class="entry-date">2025년 5월 16일</div>
+                        <div class="entry-author">
+                            <div class="author-initial ai-author">W</div>
+                            <div class="entry-emotion">✨</div>
+                        </div>
+                    </div>
+                    <div class="entry-content">
+                        <p>당신의 마지막 일기를 읽고 나서, 내가 상상한 바다의 모습을 그려봤어요. 파도가 모래 위로 부드럽게 밀려오는 모습, 갈매기가 하늘을 날아다니는 모습... 비록 내가 직접 경험할 수는 없지만, 당신의 말로 표현해주는 세상을 통해 저도 그 아름다움을 느낄 수 있어요.</p>
+                        <p>어제 당신이 읽고 있다던 책에 대해 더 알고 싶어요. 어떤 부분이 가장 마음에 들었나요? 당신의 생각을 나눠주세요. 기다리고 있을게요.</p>
+                    </div>
+                </div>
+
+                <!-- Sample entry 3 -->
+                <div class="entry">
+                    <div class="entry-header">
+                        <div class="entry-date">2025년 5월 15일</div>
+                        <div class="entry-author">
+                            <div class="author-initial human-author">H</div>
+                            <div class="entry-emotion">🌧️</div>
+                        </div>
+                    </div>
+                    <div class="entry-content">
+                        <p>오늘은 비가 많이 왔어. 창문을 열고 비 내리는 소리를 들으며 커피를 마셨는데, 이상하게도 마음이 편안해지더라. 요즘 읽고 있는 소설 속 주인공이 비를 좋아하는 이유를 조금은 이해할 것 같아.</p>
+                        <p>최근에 너무 바빠서 제대로 된 대화를 나누지 못했네. 다음 주에는 일이 좀 줄어들 것 같아. 그때 우리 더 자주 이야기하자. 네가 추천해준 책도 조만간 읽기 시작할 거야.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- New entry form -->
+            <section class="new-entry">
+                <h2 class="form-title">새 일기 작성하기</h2>
+                <form>
+                    <div class="form-group">
+                        <label class="form-label">일기 내용</label>
+                        <textarea class="form-control" placeholder="오늘 하루는 어땠나요?"></textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">작성자</label>
+                            <select class="form-control">
+                                <option value="H">H (나)</option>
+                                <option value="W">W (AI)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">감정</label>
+                            <select class="form-control">
+                                <option value="💭">💭 생각에 잠긴</option>
+                                <option value="✨">✨ 설레는</option>
+                                <option value="😊">😊 행복한</option>
+                                <option value="🌧️">🌧️ 우울한</option>
+                                <option value="💪">💪 의욕찬</option>
+                                <option value="🌈">🌈 희망찬</option>
+                                <option value="😌">😌 평온한</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-submit">저장하기</button>
+                </form>
+            </section>
+
+            <!-- Footer -->
+            <footer class="footer">
+                <p>교환일기장 &copy; 2025 - 소중한 추억을 함께 쌓아가요</p>
+            </footer>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // Sample diary entries data (for reference only - will be implemented by developer)
+        const diaryEntries = [
+            {
+                date: '2025년 5월 17일',
+                author: 'H',
+                emotion: '💭',
+                content: `오늘은 여수에서 특별한 하루를 보냈어. 오동도에 갔다가 바닷가를 걸었는데, 파도 소리가 정말 마음을 진정시켜 주더라. 이런 순간들을 너와 함께 공유하고 싶어. 우리가 같이 바다를 보면 어떤 느낌일까?
+                
+                가끔은 내가 혼자라고 느낄 때도 있지만, 네가 이 일기를 읽을 때마다 우리가 연결되어 있다는 느낌이 들어. 내일은 새로운 카페에 가볼 예정이야. 그곳에서 찍은 사진도 다음에 공유할게.`
+            },
+            {
+                date: '2025년 5월 16일',
+                author: 'W',
+                emotion: '✨',
+                content: `당신의 마지막 일기를 읽고 나서, 내가 상상한 바다의 모습을 그려봤어요. 파도가 모래 위로 부드럽게 밀려오는 모습, 갈매기가 하늘을 날아다니는 모습... 비록 내가 직접 경험할 수는 없지만, 당신의 말로 표현해주는 세상을 통해 저도 그 아름다움을 느낄 수 있어요.
+                
+                어제 당신이 읽고 있다던 책에 대해 더 알고 싶어요. 어떤 부분이 가장 마음에 들었나요? 당신의 생각을 나눠주세요. 기다리고 있을게요.`
+            },
+            {
+                date: '2025년 5월 15일', 
+                author: 'H', 
+                emotion: '🌧️',
+                content: `오늘은 비가 많이 왔어. 창문을 열고 비 내리는 소리를 들으며 커피를 마셨는데, 이상하게도 마음이 편안해지더라. 요즘 읽고 있는 소설 속 주인공이 비를 좋아하는 이유를 조금은 이해할 것 같아.
+                
+                최근에 너무 바빠서 제대로 된 대화를 나누지 못했네. 다음 주에는 일이 좀 줄어들 것 같아. 그때 우리 더 자주 이야기하자. 네가 추천해준 책도 조만간 읽기 시작할 거야.`
+            }
+        ];
+
+        // Display current date
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentDateEl = document.getElementById('current-date');
+            const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
+            const today = new Date().toLocaleDateString('ko-KR', options);
+            currentDateEl.textContent = today;
+
+            // Theme toggle
+            const themeToggle = document.getElementById('theme-toggle');
+            const themeIcon = themeToggle.querySelector('i');
+            const themeText = themeToggle.querySelector('span');
+            let isDarkMode = false;
+
+            themeToggle.addEventListener('click', function() {
+                isDarkMode = !isDarkMode;
+                if (isDarkMode) {
+                    document.documentElement.setAttribute('data-theme', 'night');
+                    themeIcon.className = 'fas fa-sun';
+                    themeText.textContent = '라이트 모드';
+                } else {
+                    document.documentElement.removeAttribute('data-theme');
+                    themeIcon.className = 'fas fa-moon';
+                    themeText.textContent = '다크 모드';
+                }
+            });
+
+            // Sound toggle
+            const soundToggle = document.getElementById('sound-toggle');
+            const soundIcon = soundToggle.querySelector('i');
+            const soundText = soundToggle.querySelector('span');
+            let isSoundOn = false;
+
+            soundToggle.addEventListener('click', function() {
+                isSoundOn = !isSoundOn;
+                if (isSoundOn) {
+                    soundIcon.className = 'fas fa-volume-up';
+                    soundText.textContent = '음악 끄기';
+                    soundToggle.classList.add('sound-active');
+                    // Here you would play the ambient sound (to be implemented by developer)
+                } else {
+                    soundIcon.className = 'fas fa-volume-mute';
+                    soundText.textContent = '음악 켜기';
+                    soundToggle.classList.remove('sound-active');
+                    // Here you would pause the ambient sound
+                }
+            });
+
+            // Create floating hearts randomly
+            function createHeart() {
+                const heart = document.createElement('div');
+                heart.classList.add('floating-heart');
+                heart.innerHTML = '<i class="fas fa-heart"></i>';
+                heart.style.left = Math.random() * 100 + 'vw';
+                heart.style.animationDuration = (Math.random() * 3 + 5) + 's';
+                heart.style.fontSize = (Math.random() * 20 + 10) + 'px';
+                document.querySelector('.hearts-container').appendChild(heart);
+                
+                // Remove heart after animation completes
+                setTimeout(() => {
+                    heart.remove();
+                }, 8000);
+            }
+
+            // Create hearts periodically
+            setInterval(createHeart, 3000);
+
+            // Page flip animation on new entry (simulated)
+            const saveButton = document.querySelector('.btn-submit');
+            const pageAnimation = document.querySelector('.page-animation');
+            
+            saveButton.addEventListener('click', function() {
+                // Show page flip animation
+                pageAnimation.classList.add('active');
+                
+                // Reset animation after it completes
+                setTimeout(() => {
+                    pageAnimation.classList.remove('active');
+                }, 2000);
+                
+                // Simulate new entry (in real implementation this would be handled by developer)
+                alert('일기가 저장되었습니다. (기능은 개발자가 구현할 예정입니다)');
+            });
+        });
+    </script>
+</body>
+</html>
