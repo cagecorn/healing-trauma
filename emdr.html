@@ -62,7 +62,7 @@
             border-radius: 50%;
             top: 50%;
             transform: translateY(-50%);
-            transition: left 0.05s linear;
+            /* transition 속성을 JavaScript에서 동적으로 제어합니다. */
         }
 
         .tactile-cue {
@@ -252,13 +252,12 @@
             const mode = modeSelect.value;
             const color = targetColorSelect.value;
 
-            // 시각적 요소가 필요한 모드 (시각, 시각+청각)
             if (mode === 'visual' || mode === 'visual_auditory') {
                 const visualTarget = document.createElement('div');
                 visualTarget.className = 'visual-target';
                 visualTarget.id = 'visualTarget';
                 visualTarget.style.backgroundColor = color;
-                visualTarget.style.left = '10px'; // 초기 위치는 왼쪽
+                visualTarget.style.left = '10px';
                 trackArea.appendChild(visualTarget);
             } else if (mode === 'tactile') {
                 const leftCue = document.createElement('div');
@@ -272,10 +271,8 @@
                 trackArea.appendChild(leftCue);
                 trackArea.appendChild(rightCue);
             }
-            // 청각 단독 모드는 시각적 UI가 필요 없음
         }
 
-        // 오디오 컨텍스트 초기화 (사용자 상호작용 시)
         function initAudio() {
             if (!audioContext) {
                 audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -285,39 +282,38 @@
         function startSession() {
             if (isSessionActive) return;
 
-            // 설정 값 가져오기
             const mode = modeSelect.value;
             const bpm = parseInt(speedSelect.value);
             const duration = parseInt(durationSelect.value);
             
-            // BPM을 ms 간격으로 변환 (한 쪽당 시간)
             const intervalTime = 60000 / bpm;
 
-            // 청각 요소가 필요한 모드 (청각, 시각+청각)
+            // 시각 모드일 경우, 부드러운 움직임을 위해 transition 설정
+            if (mode === 'visual' || mode === 'visual_auditory') {
+                const visualTarget = document.getElementById('visualTarget');
+                // 움직이는 시간(transition-duration)을 자극 간격(intervalTime)과 일치시켜 끊김 없는 움직임 구현
+                // ease-in-out으로 시작과 끝을 부드럽게 만듭니다.
+                visualTarget.style.transition = `left ${intervalTime / 1000}s ease-in-out`;
+            }
+
             if (mode === 'auditory' || mode === 'visual_auditory') {
-                initAudio(); // 사용자가 시작 버튼을 눌렀으므로 오디오 초기화
+                initAudio();
                 
-                // 오디오 노드 설정
                 oscillator = audioContext.createOscillator();
                 panner = audioContext.createStereoPanner();
-                
-                oscillator.type = 'sine'; // 부드러운 소리
-                oscillator.frequency.setValueAtTime(440, audioContext.currentTime); // '라' 음
-                
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(440, audioContext.currentTime);
                 oscillator.connect(panner).connect(audioContext.destination);
                 oscillator.start();
             }
 
-            // 타이머 설정
             remainingTime = duration;
             updateTimerDisplay();
             
-            // 버튼 상태 변경
             startBtn.disabled = true;
             stopBtn.disabled = false;
             isSessionActive = true;
             
-            // 타이머 시작
             timerInterval = setInterval(() => {
                 remainingTime--;
                 updateTimerDisplay();
@@ -327,13 +323,11 @@
                 }
             }, 1000);
             
-            // BLS(양측성 자극) 로직 실행
             const runBLS = () => {
                 if (!isSessionActive) return;
                 
                 const isMovingRight = currentSide === 'left';
 
-                // 1. 시각 자극 (Visual & Visual+Auditory modes)
                 if (mode === 'visual' || mode === 'visual_auditory') {
                     const visualTarget = document.getElementById('visualTarget');
                     if (isMovingRight) {
@@ -343,12 +337,10 @@
                     }
                 }
 
-                // 2. 청각 자극 (Auditory & Visual+Auditory modes)
                 if (mode === 'auditory' || mode === 'visual_auditory') {
                      panner.pan.setValueAtTime(isMovingRight ? 1 : -1, audioContext.currentTime);
                 }
 
-                // 3. 촉각 자극 (Tactile mode)
                 if (mode === 'tactile') {
                     const leftCue = document.getElementById('leftCue');
                     const rightCue = document.getElementById('rightCue');
@@ -365,26 +357,31 @@
                     }
                 }
 
-                // 다음 사이드로 전환
                 currentSide = isMovingRight ? 'right' : 'left';
             };
             
             blsInterval = setInterval(runBLS, intervalTime);
-            runBLS(); // 즉시 1회 실행
+            runBLS();
         }
         
         function stopSession() {
             clearInterval(blsInterval);
             clearInterval(timerInterval);
             
-            // 청각 요소가 있었던 세션일 경우 오디오 중지
             if (isSessionActive && (modeSelect.value === 'auditory' || modeSelect.value === 'visual_auditory') && oscillator) {
                 oscillator.stop();
             }
 
             isSessionActive = false;
             
-            // UI 초기화
+            if (modeSelect.value === 'visual' || modeSelect.value === 'visual_auditory') {
+                 const visualTarget = document.getElementById('visualTarget');
+                 if(visualTarget) {
+                     // 세션 종료 시, 움직임을 즉시 멈추도록 transition을 초기화합니다.
+                     visualTarget.style.transition = 'none';
+                 }
+            }
+
             if (modeSelect.value === 'tactile') {
                 const leftCue = document.getElementById('leftCue');
                 const rightCue = document.getElementById('rightCue');
@@ -392,7 +389,6 @@
                 if(rightCue) rightCue.classList.remove('active');
             }
             
-            // 버튼 상태 변경
             startBtn.disabled = false;
             stopBtn.disabled = true;
         }
@@ -404,11 +400,9 @@
             timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
         }
         
-        // 이벤트 리스너
         startBtn.addEventListener('click', startSession);
         stopBtn.addEventListener('click', stopSession);
         
-        // 초기 UI 설정
         setupModeUI();
     </script>
 </body>
