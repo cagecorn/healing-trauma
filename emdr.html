@@ -160,6 +160,7 @@
                     <select id="mode">
                         <option value="visual" selected>시각</option>
                         <option value="auditory">청각</option>
+                        <option value="visual_auditory">시각+청각</option>
                         <option value="tactile">촉각 (태핑 가이드)</option>
                     </select>
                 </div>
@@ -212,6 +213,7 @@
             <p>2. '시작' 버튼을 누르면 세션이 시작됩니다.</p>
             <p><strong>- 시각 모드:</strong> 머리는 고정한 채, 눈으로만 움직이는 타겟을 따라가세요.</p>
             <p><strong>- 청각 모드:</strong> (헤드폰/이어폰 필수) 왼쪽, 오른쪽에서 번갈아 들리는 소리에 집중하세요. 눈을 감으셔도 좋습니다.</p>
+            <p><strong>- 시각+청각 모드:</strong> (헤드폰/이어폰 필수) 움직이는 타겟을 눈으로 따라가면서, 타겟의 위치에 따라 들려오는 소리에 집중하세요.</p>
             <p><strong>- 촉각 모드:</strong> 화면의 가이드에 맞춰 양손으로 무릎이나 어깨를 번갈아 가며 가볍게 두드려주세요(태핑).</p>
             <p>3. '중지' 버튼으로 언제든 멈출 수 있습니다.</p>
             <p><strong>참고:</strong> 이 도구는 전문 치료를 대체하지 않습니다. 전문가와의 상담을 우선으로 하세요.</p>
@@ -234,7 +236,7 @@
         let blsInterval;
         let timerInterval;
         let remainingTime;
-        let currentSide = 'left'; // 'left' or 'right'
+        let currentSide = 'left'; // 'left'는 오른쪽으로 이동할 차례를 의미
 
         // Web Audio API 관련 변수
         let audioContext;
@@ -250,12 +252,13 @@
             const mode = modeSelect.value;
             const color = targetColorSelect.value;
 
-            if (mode === 'visual') {
+            // 시각적 요소가 필요한 모드 (시각, 시각+청각)
+            if (mode === 'visual' || mode === 'visual_auditory') {
                 const visualTarget = document.createElement('div');
                 visualTarget.className = 'visual-target';
                 visualTarget.id = 'visualTarget';
                 visualTarget.style.backgroundColor = color;
-                visualTarget.style.left = '10px';
+                visualTarget.style.left = '10px'; // 초기 위치는 왼쪽
                 trackArea.appendChild(visualTarget);
             } else if (mode === 'tactile') {
                 const leftCue = document.createElement('div');
@@ -269,7 +272,7 @@
                 trackArea.appendChild(leftCue);
                 trackArea.appendChild(rightCue);
             }
-            // 청각 모드는 시각적 UI가 필요 없음
+            // 청각 단독 모드는 시각적 UI가 필요 없음
         }
 
         // 오디오 컨텍스트 초기화 (사용자 상호작용 시)
@@ -286,12 +289,12 @@
             const mode = modeSelect.value;
             const bpm = parseInt(speedSelect.value);
             const duration = parseInt(durationSelect.value);
-            const color = targetColorSelect.value;
             
             // BPM을 ms 간격으로 변환 (한 쪽당 시간)
             const intervalTime = 60000 / bpm;
 
-            if (mode === 'auditory') {
+            // 청각 요소가 필요한 모드 (청각, 시각+청각)
+            if (mode === 'auditory' || mode === 'visual_auditory') {
                 initAudio(); // 사용자가 시작 버튼을 눌렀으므로 오디오 초기화
                 
                 // 오디오 노드 설정
@@ -327,23 +330,33 @@
             // BLS(양측성 자극) 로직 실행
             const runBLS = () => {
                 if (!isSessionActive) return;
+                
+                const isMovingRight = currentSide === 'left';
 
-                if (mode === 'visual') {
+                // 1. 시각 자극 (Visual & Visual+Auditory modes)
+                if (mode === 'visual' || mode === 'visual_auditory') {
                     const visualTarget = document.getElementById('visualTarget');
-                    if (currentSide === 'left') {
+                    if (isMovingRight) {
                         visualTarget.style.left = (trackArea.clientWidth - visualTarget.clientWidth - 10) + 'px';
                     } else {
                         visualTarget.style.left = '10px';
                     }
-                } else if (mode === 'auditory') {
-                     panner.pan.setValueAtTime(currentSide === 'left' ? 1 : -1, audioContext.currentTime);
-                } else if (mode === 'tactile') {
+                }
+
+                // 2. 청각 자극 (Auditory & Visual+Auditory modes)
+                if (mode === 'auditory' || mode === 'visual_auditory') {
+                     panner.pan.setValueAtTime(isMovingRight ? 1 : -1, audioContext.currentTime);
+                }
+
+                // 3. 촉각 자극 (Tactile mode)
+                if (mode === 'tactile') {
                     const leftCue = document.getElementById('leftCue');
                     const rightCue = document.getElementById('rightCue');
+                    const color = targetColorSelect.value;
                     leftCue.style.backgroundColor = color;
                     rightCue.style.backgroundColor = color;
                     
-                    if (currentSide === 'left') {
+                    if (isMovingRight) {
                         leftCue.classList.remove('active');
                         rightCue.classList.add('active');
                     } else {
@@ -353,7 +366,7 @@
                 }
 
                 // 다음 사이드로 전환
-                currentSide = (currentSide === 'left') ? 'right' : 'left';
+                currentSide = isMovingRight ? 'right' : 'left';
             };
             
             blsInterval = setInterval(runBLS, intervalTime);
@@ -364,7 +377,8 @@
             clearInterval(blsInterval);
             clearInterval(timerInterval);
             
-            if (isSessionActive && modeSelect.value === 'auditory' && oscillator) {
+            // 청각 요소가 있었던 세션일 경우 오디오 중지
+            if (isSessionActive && (modeSelect.value === 'auditory' || modeSelect.value === 'visual_auditory') && oscillator) {
                 oscillator.stop();
             }
 
