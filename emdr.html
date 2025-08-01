@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EMDR 안구 움직임 추적 도구</title>
+    <title>EMDR 양측성 자극 (BLS) 도구</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -47,9 +47,14 @@
             border-radius: 8px;
             margin: 20px 0;
             overflow: hidden;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            box-sizing: border-box;
         }
         
-        .target {
+        .visual-target {
             position: absolute;
             width: 30px;
             height: 30px;
@@ -58,6 +63,20 @@
             top: 50%;
             transform: translateY(-50%);
             transition: left 0.05s linear;
+        }
+
+        .tactile-cue {
+            width: 60px;
+            height: 60px;
+            background-color: #bdc3c7;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+        }
+
+        .tactile-cue.active {
+            transform: scale(1.2);
+            background-color: #3498db;
+            box-shadow: 0 0 15px #3498db;
         }
         
         button {
@@ -82,9 +101,8 @@
         }
         
         .settings {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 15px;
             margin-bottom: 15px;
         }
@@ -106,6 +124,7 @@
             border-radius: 4px;
             border: 1px solid #ddd;
             width: 100%;
+            box-sizing: border-box;
         }
         
         .timer {
@@ -128,33 +147,30 @@
             margin-top: 0;
             color: #2980b9;
         }
-        
-        @media (max-width: 600px) {
-            .settings {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            
-            .setting-group {
-                width: 100%;
-            }
-        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>EMDR 안구 움직임 추적 도구</h1>
+        <h1>EMDR 양측성 자극 (BLS) 도구</h1>
         
         <div class="controls">
             <div class="settings">
                 <div class="setting-group">
-                    <label for="speed">속도 (초당 움직임 횟수):</label>
+                    <label for="mode">모드 선택:</label>
+                    <select id="mode">
+                        <option value="visual" selected>시각</option>
+                        <option value="auditory">청각</option>
+                        <option value="tactile">촉각 (태핑 가이드)</option>
+                    </select>
+                </div>
+                <div class="setting-group">
+                    <label for="speed">속도 (BPM - 분당 비트 수):</label>
                     <select id="speed">
-                        <option value="0.5">매우 느림 (0.5회/초)</option>
-                        <option value="1" selected>느림 (1회/초)</option>
-                        <option value="1.5">중간 (1.5회/초)</option>
-                        <option value="2">빠름 (2회/초)</option>
-                        <option value="2.5">매우 빠름 (2.5회/초)</option>
+                        <option value="30">매우 느림 (30 BPM)</option>
+                        <option value="45">느림 (45 BPM)</option>
+                        <option value="60" selected>중간 (60 BPM)</option>
+                        <option value="75">빠름 (75 BPM)</option>
+                        <option value="90">매우 빠름 (90 BPM)</option>
                     </select>
                 </div>
                 
@@ -170,7 +186,7 @@
                 </div>
                 
                 <div class="setting-group">
-                    <label for="targetColor">타겟 색상:</label>
+                    <label for="targetColor">타겟/가이드 색상:</label>
                     <select id="targetColor">
                         <option value="#3498db" selected>파랑</option>
                         <option value="#e74c3c">빨강</option>
@@ -188,50 +204,107 @@
         <div class="timer" id="timer">00:00</div>
         
         <div class="track-area" id="trackArea">
-            <div class="target" id="target"></div>
-        </div>
+            </div>
         
         <div class="instructions">
             <h3>사용 방법</h3>
-            <p>1. 위의 설정에서 원하는 속도와 세션 시간을 선택하세요.</p>
-            <p>2. '시작' 버튼을 누르면 타겟이 좌우로 움직이기 시작합니다.</p>
-            <p>3. 타겟을 눈으로만 따라가며, 머리는 움직이지 마세요.</p>
-            <p>4. 세션 도중 멈추려면 '중지' 버튼을 누르세요.</p>
-            <p>5. 한 세션이 끝나면 잠시 휴식한 후 필요에 따라 반복하세요.</p>
-            <p><strong>참고:</strong> 이 도구는 전문 EMDR 치료를 대체하지 않습니다. 트라우마나 심각한 정신 건강 문제가 있는 경우 전문가와 상담하세요.</p>
+            <p>1. 원하는 <strong>모드, 속도, 시간, 색상</strong>을 선택하세요.</p>
+            <p>2. '시작' 버튼을 누르면 세션이 시작됩니다.</p>
+            <p><strong>- 시각 모드:</strong> 머리는 고정한 채, 눈으로만 움직이는 타겟을 따라가세요.</p>
+            <p><strong>- 청각 모드:</strong> (헤드폰/이어폰 필수) 왼쪽, 오른쪽에서 번갈아 들리는 소리에 집중하세요. 눈을 감으셔도 좋습니다.</p>
+            <p><strong>- 촉각 모드:</strong> 화면의 가이드에 맞춰 양손으로 무릎이나 어깨를 번갈아 가며 가볍게 두드려주세요(태핑).</p>
+            <p>3. '중지' 버튼으로 언제든 멈출 수 있습니다.</p>
+            <p><strong>참고:</strong> 이 도구는 전문 치료를 대체하지 않습니다. 전문가와의 상담을 우선으로 하세요.</p>
         </div>
     </div>
 
     <script>
-        const target = document.getElementById('target');
+        // DOM 요소
         const trackArea = document.getElementById('trackArea');
         const startBtn = document.getElementById('startBtn');
         const stopBtn = document.getElementById('stopBtn');
+        const modeSelect = document.getElementById('mode');
         const speedSelect = document.getElementById('speed');
         const durationSelect = document.getElementById('duration');
         const targetColorSelect = document.getElementById('targetColor');
         const timerDisplay = document.getElementById('timer');
-        
-        let isMoving = false;
-        let movingRight = true;
-        let moveInterval;
+
+        // 상태 변수
+        let isSessionActive = false;
+        let blsInterval;
         let timerInterval;
         let remainingTime;
+        let currentSide = 'left'; // 'left' or 'right'
+
+        // Web Audio API 관련 변수
+        let audioContext;
+        let panner;
+        let oscillator;
+
+        // 모드 변경 시 UI 업데이트
+        modeSelect.addEventListener('change', setupModeUI);
+        targetColorSelect.addEventListener('change', setupModeUI);
+
+        function setupModeUI() {
+            trackArea.innerHTML = ''; // 기존 UI 초기화
+            const mode = modeSelect.value;
+            const color = targetColorSelect.value;
+
+            if (mode === 'visual') {
+                const visualTarget = document.createElement('div');
+                visualTarget.className = 'visual-target';
+                visualTarget.id = 'visualTarget';
+                visualTarget.style.backgroundColor = color;
+                visualTarget.style.left = '10px';
+                trackArea.appendChild(visualTarget);
+            } else if (mode === 'tactile') {
+                const leftCue = document.createElement('div');
+                leftCue.className = 'tactile-cue';
+                leftCue.id = 'leftCue';
+                
+                const rightCue = document.createElement('div');
+                rightCue.className = 'tactile-cue';
+                rightCue.id = 'rightCue';
+                
+                trackArea.appendChild(leftCue);
+                trackArea.appendChild(rightCue);
+            }
+            // 청각 모드는 시각적 UI가 필요 없음
+        }
+
+        // 오디오 컨텍스트 초기화 (사용자 상호작용 시)
+        function initAudio() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
         
-        // 초기화
-        target.style.left = '10px';
-        
-        function startMovement() {
-            if (isMoving) return;
-            
+        function startSession() {
+            if (isSessionActive) return;
+
             // 설정 값 가져오기
-            const speed = parseFloat(speedSelect.value);
+            const mode = modeSelect.value;
+            const bpm = parseInt(speedSelect.value);
             const duration = parseInt(durationSelect.value);
             const color = targetColorSelect.value;
             
-            // 타겟 색상 설정
-            target.style.backgroundColor = color;
-            
+            // BPM을 ms 간격으로 변환 (한 쪽당 시간)
+            const intervalTime = 60000 / bpm;
+
+            if (mode === 'auditory') {
+                initAudio(); // 사용자가 시작 버튼을 눌렀으므로 오디오 초기화
+                
+                // 오디오 노드 설정
+                oscillator = audioContext.createOscillator();
+                panner = audioContext.createStereoPanner();
+                
+                oscillator.type = 'sine'; // 부드러운 소리
+                oscillator.frequency.setValueAtTime(440, audioContext.currentTime); // '라' 음
+                
+                oscillator.connect(panner).connect(audioContext.destination);
+                oscillator.start();
+            }
+
             // 타이머 설정
             remainingTime = duration;
             updateTimerDisplay();
@@ -239,11 +312,7 @@
             // 버튼 상태 변경
             startBtn.disabled = true;
             stopBtn.disabled = false;
-            
-            // 움직임 주기 계산 (ms)
-            const movePeriod = 1000 / speed / 2; // 왕복이므로 2로 나눔
-            
-            isMoving = true;
+            isSessionActive = true;
             
             // 타이머 시작
             timerInterval = setInterval(() => {
@@ -251,37 +320,63 @@
                 updateTimerDisplay();
                 
                 if (remainingTime <= 0) {
-                    stopMovement();
+                    stopSession();
                 }
             }, 1000);
             
-            // 움직임 시작
-            moveInterval = setInterval(() => {
-                const trackWidth = trackArea.clientWidth;
-                const targetWidth = target.clientWidth;
-                
-                let currentPos = parseInt(target.style.left) || 0;
-                
-                if (movingRight) {
-                    currentPos += 10;
-                    if (currentPos >= trackWidth - targetWidth - 10) {
-                        movingRight = false;
+            // BLS(양측성 자극) 로직 실행
+            const runBLS = () => {
+                if (!isSessionActive) return;
+
+                if (mode === 'visual') {
+                    const visualTarget = document.getElementById('visualTarget');
+                    if (currentSide === 'left') {
+                        visualTarget.style.left = (trackArea.clientWidth - visualTarget.clientWidth - 10) + 'px';
+                    } else {
+                        visualTarget.style.left = '10px';
                     }
-                } else {
-                    currentPos -= 10;
-                    if (currentPos <= 10) {
-                        movingRight = true;
+                } else if (mode === 'auditory') {
+                     panner.pan.setValueAtTime(currentSide === 'left' ? 1 : -1, audioContext.currentTime);
+                } else if (mode === 'tactile') {
+                    const leftCue = document.getElementById('leftCue');
+                    const rightCue = document.getElementById('rightCue');
+                    leftCue.style.backgroundColor = color;
+                    rightCue.style.backgroundColor = color;
+                    
+                    if (currentSide === 'left') {
+                        leftCue.classList.remove('active');
+                        rightCue.classList.add('active');
+                    } else {
+                        leftCue.classList.add('active');
+                        rightCue.classList.remove('active');
                     }
                 }
-                
-                target.style.left = currentPos + 'px';
-            }, 20); // 부드러운 움직임을 위해 짧은 간격으로 설정
+
+                // 다음 사이드로 전환
+                currentSide = (currentSide === 'left') ? 'right' : 'left';
+            };
+            
+            blsInterval = setInterval(runBLS, intervalTime);
+            runBLS(); // 즉시 1회 실행
         }
         
-        function stopMovement() {
-            clearInterval(moveInterval);
+        function stopSession() {
+            clearInterval(blsInterval);
             clearInterval(timerInterval);
-            isMoving = false;
+            
+            if (isSessionActive && modeSelect.value === 'auditory' && oscillator) {
+                oscillator.stop();
+            }
+
+            isSessionActive = false;
+            
+            // UI 초기화
+            if (modeSelect.value === 'tactile') {
+                const leftCue = document.getElementById('leftCue');
+                const rightCue = document.getElementById('rightCue');
+                if (leftCue) leftCue.classList.remove('active');
+                if(rightCue) rightCue.classList.remove('active');
+            }
             
             // 버튼 상태 변경
             startBtn.disabled = false;
@@ -289,21 +384,18 @@
         }
         
         function updateTimerDisplay() {
+            if (remainingTime < 0) remainingTime = 0;
             const minutes = Math.floor(remainingTime / 60);
             const seconds = remainingTime % 60;
             timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
         }
         
         // 이벤트 리스너
-        startBtn.addEventListener('click', startMovement);
-        stopBtn.addEventListener('click', stopMovement);
+        startBtn.addEventListener('click', startSession);
+        stopBtn.addEventListener('click', stopSession);
         
-        // 화면 크기 변경 시 타겟 위치 조정
-        window.addEventListener('resize', () => {
-            if (!isMoving) {
-                target.style.left = '10px';
-            }
-        });
+        // 초기 UI 설정
+        setupModeUI();
     </script>
 </body>
 </html>
